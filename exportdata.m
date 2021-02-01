@@ -1,126 +1,120 @@
-function exportdata()
+function exportdata(directoryName)
 
-maindir='.\Database';
-subdir =  dir( maindir );
+directory =  dir(directoryName);
+irisCount = 0;
 
-itr = 0;
-
-alltemplates = zeros(5,480);
-allmasks = zeros(5,480);
-allmaskedtemplates = zeros(5,480);
-alljson = struct;
-mastermask = zeros(20,480);
-newtemplates = zeros(5,480);
-allfilenames = ["sa","as"];
-for i = 1 : length( subdir )
+%allMaskedTemplates = zeros(5,480);
+masterMask = zeros(20,480);
+%allFilenames = string.empty;
+for i = 1 : length(directory)
+    subDirName = directory(i).name;
     
-    if( isequal( subdir( i ).name, '.' ) ||  isequal( subdir( i ).name, '..' ) ||  ~subdir( i ).isdir )
+    if(isequal(subDirName, '.') ||  isequal(subDirName, '..') ||  ~directory(i).isdir)
         continue;  
     end
     
-    subdirpathL = fullfile( maindir, subdir( i ).name, 'L');
-    subdirpathR = fullfile( maindir, subdir( i ).name, 'R');
+    allTemplates = struct;
     
-    imagesL = dir( subdirpathL );
-    imagesR = dir( subdirpathR );
+    % Build full path to folders. Assumes each sub folder has a L and R sub
+    % directories
+    subDirPathL = fullfile(directoryName, subDirName, 'L');
+    subDirPathR = fullfile(directoryName, subDirName, 'R');
+    
+    imagesL = dir(subDirPathL);
+    imagesR = dir(subDirPathR);
     
     for j = 1 : length(imagesL)
+        imageName = imagesL(j).name;
         
-        if( isequal( imagesL( j ).name, '.' ) ||  isequal( imagesL( j ).name, '..' ) )
+        if(isequal(imageName, '.') ||  isequal(imageName, '..' ))
             continue;  
         end
         
-        imagepath = fullfile(subdirpathL, imagesL( j ).name);
-        % disp(imagepath)
+        imagepath = fullfile(subDirPathL, imageName);
         
-        [A, B]=createiristemplate( imagepath );
+        try
+            [template, mask] = createiristemplate(imagepath);
+        catch
+            disp('Error getting iris template of ' + imagepath);
+            continue;
+        end
         
-        itr = itr + 1;
-        templates(:,:,itr) = A;
-        masks(:,:,itr) = B;
+        irisCount = irisCount + 1;
+        masterMask = masterMask | mask;
         
-        mastermask = mastermask | B;
+        maskedTemplate = double(template & ~mask);
+        maskedTemplate = reshape(maskedTemplate, [], 1);
         
-        maskedTemplate = double(A & ~B);
-        maskedTemplate = reshape(maskedTemplate,[],1);
-        filename = split(imagesL(j).name, '.');
-        disp(filename{1})
-        alljson = setfield(alljson, filename{1}, maskedTemplate');
-        allfilenames(itr) = string(filename{1});
+        filename = split(imageName, '.');
+        filename = filename{1};
+        allTemplates.(filename) = maskedTemplate';
+        %allFilenames(irisCount) = filename;
         
-        alltemplates = cat(1,alltemplates,A);
-        alltemplates = cat(1,alltemplates,zeros(5,480));
-        
-        allmasks = cat(1,allmasks,B);
-        allmasks = cat(1,allmasks,zeros(5,480));
-        
-        A = logical(A);
-        B = logical(B);
-        masked = A & (~B);
-        allmaskedtemplates = cat(1,allmaskedtemplates,masked);
-        allmaskedtemplates = cat(1,allmaskedtemplates,zeros(5,480));
-        
+        %template = logical(template);
+        %mask = logical(mask);
+        %masked = template & (~mask);
+        %allMaskedTemplates = cat(1, allMaskedTemplates, masked);
+        %allMaskedTemplates = cat(1, allMaskedTemplates, zeros(5,480));
     end
     
     for j = 1 : length(imagesR)
+        imageName = imagesR(j).name;
         
-        if( isequal( imagesR( j ).name, '.' ) ||  isequal( imagesR( j ).name, '..' ) )
+        if(isequal(imageName, '.') ||  isequal(imageName, '..' ))
             continue;  
         end
         
-        imagepath = fullfile(subdirpathR, imagesR( j ).name);
-        % disp(imagepath)
+        imagepath = fullfile(subDirPathR, imageName);
         
-        [A, B]=createiristemplate( imagepath );
+        try
+            [template, mask] = createiristemplate(imagepath);
+        catch
+            disp('Error getting iris template of ' + imagepath);
+            continue;
+        end
         
-        itr = itr + 1;
-        templates(:,:,itr) = A;
-        masks(:,:,itr) = B;
+        irisCount = irisCount + 1;
+        masterMask = masterMask | mask;
         
-        mastermask = mastermask | B;
+        maskedTemplate = double(template & ~mask);
+        maskedTemplate = reshape(maskedTemplate, [], 1);
         
-        maskedTemplate = double(A & ~B);
-        maskedTemplate = reshape(maskedTemplate,[],1);
-        filename = split(imagesR(j).name, '.');
-        disp(filename{1})
-        alljson = setfield(alljson, filename{1}, maskedTemplate');
-        allfilenames(itr) = string(filename{1});
+        filename = split(imageName, '.');
+        filename = filename{1};
+        allTemplates.(filename) = maskedTemplate';
+        %allFilenames(irisCount) = filename;
         
-        alltemplates = cat(1,alltemplates,A);
-        alltemplates = cat(1,alltemplates,zeros(5,480));
-        
-        allmasks = cat(1,allmasks,B);
-        allmasks = cat(1,allmasks,zeros(5,480));
-        
-        A = logical(A);
-        B = logical(B);
-        masked = A & (~B);
-        allmaskedtemplates = cat(1,allmaskedtemplates,masked);
-        allmaskedtemplates = cat(1,allmaskedtemplates,zeros(5,480));
-        
+        %template = logical(template);
+        %mask = logical(mask);
+        %masked = template & (~mask);
+        %allMaskedTemplates = cat(1, allMaskedTemplates, masked);
+        %allMaskedTemplates = cat(1, allMaskedTemplates, zeros(5,480));
     end
-    
-    %fulldir=strcat(maindir,'\',subdir(i).name,'\');
-    %save([fulldir, 'templatemask.mat'], 'A','B');
-
+    allJsonDump = json.dump(allTemplates);
+    outputFileName = ['D:\Documents\College Stuff\Masters\Dissertation\Data\ProcessedData\IrisIntervalCASIA\IndividualMasked\' subDirName '.json'];
+    json.write(allJsonDump, outputFileName);
 end
 
-alljsondump = json.dump(alljson);
-json.write(alljsondump,'./myjson1.json');
+disp(irisCount);
+masterMask = double(masterMask);
+allJsonDump = json.dump(masterMask);
+json.write(allJsonDump, './myMasterMask.json');
 
-disp(allfilenames)
-for j=1:itr
-    templateForCalc = templates(:,:,j);
-    templateForCalc = logical(templateForCalc) & ~(logical(mastermask));
-    newtemplates = cat(1,newtemplates,templateForCalc);
-    newtemplates = cat(1,newtemplates,zeros(5,480));
-    templateForCalc = reshape(templateForCalc,[],1);
-    templateForCalc = double(templateForCalc);
-    alljson = setfield(alljson, (allfilenames(j)), templateForCalc');
+%newtemplates = zeros(5,480);
+
+% for j = 1:irisCount
+%     templateForCalc = templates(:,:,j);
+%     templateForCalc = logical(templateForCalc) & ~(logical(masterMask));
+%     %newtemplates = cat(1, newtemplates, templateForCalc);
+%     %newtemplates = cat(1, newtemplates, zeros(5,480));
+%     templateForCalc = reshape(templateForCalc, [], 1);
+%     templateForCalc = double(templateForCalc);
+%     allJson.(allFilenames(j)) = templateForCalc';
+% end
+
+%imshow(newtemplates)
+%imshow(allmaskedtemplates)
+
+% allJsonDump = json.dump(allJson);
+% json.write(allJsonDump, './myDataMasterMask.json');
 end
-
-imshow(newtemplates)
-imshow(allmaskedtemplates)
-
-alljsondump = json.dump(alljson);
-json.write(alljsondump,'./myjson2.json');
