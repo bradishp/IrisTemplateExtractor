@@ -1,4 +1,4 @@
-function exportdata(directoryName)
+function exportdata(directoryName, outputPath, databaseName)
 
 directory =  dir(directoryName);
 irisCount = 0;
@@ -47,7 +47,8 @@ for i = 1 : length(directory)
         
         filename = split(imageName, '.');
         filename = filename{1};
-        allTemplates.(filename) = maskedTemplate';
+        templateName = strcat(databaseName, "_", subDirName, "_", filename, "_L");
+        allTemplates.(templateName) = maskedTemplate';
         %allFilenames(irisCount) = filename;
         
         %template = logical(template);
@@ -81,7 +82,8 @@ for i = 1 : length(directory)
         
         filename = split(imageName, '.');
         filename = filename{1};
-        allTemplates.(filename) = maskedTemplate';
+        templateName = strcat(databaseName, "_", subDirName, "_", filename, "_R");
+        allTemplates.(templateName) = maskedTemplate';
         %allFilenames(irisCount) = filename;
         
         %template = logical(template);
@@ -91,14 +93,15 @@ for i = 1 : length(directory)
         %allMaskedTemplates = cat(1, allMaskedTemplates, zeros(5,480));
     end
     allJsonDump = json.dump(allTemplates);
-    outputFileName = ['D:\Documents\College Stuff\Masters\Dissertation\Data\ProcessedData\IrisIntervalCASIA\IndividualMasked\' subDirName '.json'];
+    outputFileName = strcat(outputPath, databaseName, '\', subDirName, '.json');
     json.write(allJsonDump, outputFileName);
 end
 
 disp(irisCount);
 masterMask = double(masterMask);
 allJsonDump = json.dump(masterMask);
-json.write(allJsonDump, './myMasterMask.json');
+outputMaskFileName = strcat(outputPath, 'MasterMasks\', databaseName, '.json');
+json.write(allJsonDump, outputMaskFileName);
 
 %newtemplates = zeros(5,480);
 
