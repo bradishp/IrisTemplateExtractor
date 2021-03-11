@@ -29,8 +29,8 @@ function [circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage)
 % define range of pupil & iris radii
 
 %CASIA
-lpupilradius = 28;
-upupilradius = 75;
+lpupilradius = 28;  % lower radius
+upupilradius = 75;  % upper radius
 lirisradius = 80;
 uirisradius = 150;
 

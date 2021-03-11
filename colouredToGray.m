@@ -19,6 +19,6 @@ function [gray_img] = colouredToGray(img)
      for i=1:M
          for j=1:N
                gray_img(i, j)=(R(i, j)*0.2989)+(G(i, j)*0.5870)+(B(i, j)*0.114);
-              end
+         end
      end
 end
