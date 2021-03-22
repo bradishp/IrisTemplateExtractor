@@ -29,10 +29,10 @@ function [circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage)
 % define range of pupil & iris radii
 
 %CASIA
-lpupilradius = 28;  % lower radius
-upupilradius = 75;  % upper radius
-lirisradius = 80;
-uirisradius = 150;
+lowerPupilRadius = 28;
+upperPupilRadius = 75;
+lowerIrisRadius = 80;
+upperIrisRadius = 150;
 
 %    %LIONS
 %    lpupilradius = 32;
@@ -47,68 +47,68 @@ scaling = 0.4;
 reflecthres = 240;
 
 % find the iris boundary
-[row, col, r] = findcircle(eyeimage, lirisradius, uirisradius, scaling, 2, 0.20, 0.19, 1.00, 0.00);
+[row, col, radius] = findcircle(eyeimage, lowerIrisRadius, upperIrisRadius, scaling, 2, 0.20, 0.19, 1.00, 0.00);
 
-circleiris = [row col r];
+circleiris = [row col radius];
 
 rowd = double(row);
 cold = double(col);
-rd = double(r);
+radiusD = double(radius);
 
-irl = round(rowd-rd);
-iru = round(rowd+rd);
-icl = round(cold-rd);
-icu = round(cold+rd);
+irisRowLower = round(rowd-radiusD);
+irisRowUpper = round(rowd+radiusD);
+irisColumnLower = round(cold-radiusD);
+irisColumnUpper = round(cold+radiusD);
 
 imgsize = size(eyeimage);
 
-if irl < 1 
-    irl = 1;
+if irisRowLower < 1
+    irisRowLower = 1;
 end
 
-if icl < 1
-    icl = 1;
+if irisColumnLower < 1
+    irisColumnLower = 1;
 end
 
-if iru > imgsize(1)
-    iru = imgsize(1);
+if irisRowUpper > imgsize(1)
+    irisRowUpper = imgsize(1);
 end
 
-if icu > imgsize(2)
-    icu = imgsize(2);
+if irisColumnUpper > imgsize(2)
+    irisColumnUpper = imgsize(2);
 end
 
 % to find the inner pupil, use just the region within the previously
 % detected iris boundary
-imagepupil = eyeimage( irl:iru,icl:icu);
+imagepupil = eyeimage( irisRowLower:irisRowUpper,irisColumnLower:irisColumnUpper);
 
 %find pupil boundary
-[rowp, colp, r] = findcircle(imagepupil, lpupilradius, upupilradius ,0.6,2,0.25,0.25,1.00,1.00);
+[rowPupil, colPupil, radiusPupil] = findcircle(imagepupil, lowerPupilRadius, upperPupilRadius ,0.6,2,0.25,0.25,1.00,1.00);
 
-rowp = double(rowp);
-colp = double(colp);
-r = double(r);
+rowPupil = double(rowPupil);
+colPupil = double(colPupil);
+radiusPupil = double(radiusPupil);
 
-row = double(irl) + rowp;
-col = double(icl) + colp;
+row = double(irisRowLower) + rowPupil;
+col = double(irisColumnLower) + colPupil;
 
 row = round(row);
 col = round(col);
 
-circlepupil = [row col r];
+circlepupil = [row col radiusPupil];
 
 % set up array for recording noise regions
 % noise pixels will have NaN values
 imagewithnoise = double(eyeimage);
 
 %find top eyelid
-topeyelid = imagepupil(1:(rowp-r),:);
+topeyelid = imagepupil(1:(rowPupil-radiusPupil),:);
 lines = findline(topeyelid);
 
 if size(lines,1) > 0
-    [xl yl] = linecoords(lines, size(topeyelid));
-    yl = double(yl) + irl-1;
-    xl = double(xl) + icl-1;
+    [xl, yl] = linecoords(lines, size(topeyelid));
+    yl = double(yl) + irisRowLower-1;
+    xl = double(xl) + irisColumnLower-1;
     
     yla = max(yl);
     
@@ -121,14 +121,14 @@ if size(lines,1) > 0
 end
 
 %find bottom eyelid
-bottomeyelid = imagepupil((rowp+r):size(imagepupil,1),:);
+bottomeyelid = imagepupil((rowPupil+radiusPupil):size(imagepupil,1),:);
 lines = findline(bottomeyelid);
 
 if size(lines,1) > 0
     
-    [xl yl] = linecoords(lines, size(bottomeyelid));
-    yl = double(yl)+ irl+rowp+r-2;
-    xl = double(xl) + icl-1;
+    [xl, yl] = linecoords(lines, size(bottomeyelid));
+    yl = double(yl)+ irisRowLower+rowPupil+radiusPupil-2;
+    xl = double(xl) + irisColumnLower-1;
     
     yla = min(yl);
     
@@ -141,6 +141,6 @@ if size(lines,1) > 0
 end
 
 %For CASIA, eliminate eyelashes by thresholding
-ref = eyeimage < 10;
-coords = find(ref==1);
-imagewithnoise(coords) = NaN;
+%ref = eyeimage < 10;
+%coords = find(ref==1);
+%imagewithnoise(coords) = NaN;

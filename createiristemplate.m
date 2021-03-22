@@ -18,7 +18,7 @@
 % The University of Western Australia
 % November 2003
 
-function [template, mask] = createiristemplate(eyeimage_filename)
+function [template, mask] = createiristemplate(eyeimageFilePath, imageName)
 
 % path for writing diagnostic images
 global DIAGPATH
@@ -36,7 +36,7 @@ minWaveLength=18;
 mult=1; % not applicable if using nscales = 1
 sigmaOnf=0.5;
 
-eyeimage = imread(eyeimage_filename);
+eyeimage = imread(eyeimageFilePath);
 [~, ~, img_channels]  = size(eyeimage);
 if img_channels == 3
     eyeimage=colouredToGray(eyeimage);
@@ -64,7 +64,7 @@ else
 end
 %}
 
-[circleiris circlepupil imagewithnoise] = segmentiris(eyeimage);
+[circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage);
 
 % WRITE NOISE IMAGE
 %
@@ -89,22 +89,22 @@ imagewithcircles(ind2) = 255;
 imagewithcircles(ind1) = 255;
 w = cd;
 cd(DIAGPATH);
-%imwrite(imagewithnoise2,[eyeimage_filename,'-noise.jpg'],'jpg');
-%imwrite(imagewithcircles,[eyeimage_filename,'-segmented.jpg'],'jpg');
+imwrite(imagewithnoise2, strcat(imageName,'-noise.jpg'),'jpg');
+imwrite(imagewithcircles, strcat(imageName,'-segmented.jpg'),'jpg');
 cd(w);
 
 % perform normalisation
 
-[polar_array noise_array] = normaliseiris(imagewithnoise, circleiris(2),...
-    circleiris(1), circleiris(3), circlepupil(2), circlepupil(1), circlepupil(3),eyeimage_filename, radial_res, angular_res);
+[polar_array, noise_array] = normaliseiris(imagewithnoise, circleiris(2),...
+    circleiris(1), circleiris(3), circlepupil(2), circlepupil(1), circlepupil(3), imageName, radial_res, angular_res);
 
 
 % WRITE NORMALISED PATTERN, AND NOISE PATTERN
 w = cd;
 cd(DIAGPATH);
-%imwrite(polar_array,[eyeimage_filename,'-polar.jpg'],'jpg');
-%imwrite(noise_array,[eyeimage_filename,'-polarnoise.jpg'],'jpg');
+imwrite(polar_array, strcat(imageName,'-polar.jpg'),'jpg');
+imwrite(noise_array, strcat(imageName,'-polarnoise.jpg'),'jpg');
 cd(w);
 
 % perform feature encoding
-[template mask] = encode(polar_array, noise_array, nscales, minWaveLength, mult, sigmaOnf); 
+[template, mask] = encode(polar_array, noise_array, nscales, minWaveLength, mult, sigmaOnf);

@@ -1,5 +1,5 @@
 function [allTemplates, allMasks, allMaskedTemplates] = ...
-    getTemplatesFromFolder(databaseName, subDirName, nameSuffix, subDirPath, allTemplates, allMasks, allMaskedTemplates)
+    getTemplatesFromFolder(databaseName, subDirName, rlIndicator, subDirPath, allTemplates, allMasks, allMaskedTemplates)
 
 images = dir(subDirPath);
 for j = 1 : length(images)
@@ -12,7 +12,7 @@ for j = 1 : length(images)
     imagepath = fullfile(subDirPath, imageName);
 
     try
-        [template, mask] = createiristemplate(imagepath);
+        [template, mask] = createiristemplate(imagepath, imageName);
     catch e
         disp('Error getting iris template of ' + imagepath);
         disp(e);
@@ -24,9 +24,9 @@ for j = 1 : length(images)
     template = reshape(template, [], 1);
     mask = reshape(mask, [], 1);
 
-    image_name_components = split(imageName, '.');
-    filename = image_name_components{1};
-    templateName = strcat(databaseName, "_", subDirName, "_", filename, "_", nameSuffix);
+    fileNameComponents = split(imageName, '.');
+    fileName = fileNameComponents{1};
+    templateName = strcat(databaseName, "_", subDirName, "_", rlIndicator, "_", fileName);
 
     allTemplates.(templateName) = template';
     allMasks.(templateName) = mask';

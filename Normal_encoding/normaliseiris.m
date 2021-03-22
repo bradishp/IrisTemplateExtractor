@@ -43,11 +43,11 @@ x_pupil, y_pupil, r_pupil,eyeimage_filename, radpixels, angulardiv)
 global DIAGPATH
 
 radiuspixels = radpixels + 2;
-angledivisions = angulardiv-1;
 
 r = 0:(radiuspixels-1);
 
-theta = 0:2*pi/angledivisions:2*pi;
+angleStepSize = (2*pi)/angulardiv;
+theta = 0:angleStepSize:(2*pi) - angleStepSize;
 
 x_iris = double(x_iris);
 y_iris = double(y_iris);
@@ -61,22 +61,18 @@ r_pupil = double(r_pupil);
 ox = x_pupil - x_iris;
 oy = y_pupil - y_iris;
 
-if ox <= 0
+if ox == 0 && oy > 0
+    sgn = 1;
+elseif ox <= 0
     sgn = -1;
-elseif ox > 0
+else
     sgn = 1;
-end
-
-if ox==0 && oy > 0
-    
-    sgn = 1;
-    
 end
 
 r = double(r);
 theta = double(theta);
 
-a = ones(1,angledivisions+1)* (ox^2 + oy^2);
+alpha = ones(1,angulardiv)* (ox^2 + oy^2);
 
 % need to do something for ox = 0
 if ox == 0
@@ -85,16 +81,16 @@ else
     phi = atan(oy/ox);
 end
 
-b = sgn.*cos(pi - phi - theta);
+beta = sgn.*cos(pi - phi - theta);
 
 % calculate radius around the iris as a function of the angle
-r = (sqrt(a).*b) + ( sqrt( a.*(b.^2) - (a - (r_iris^2))));
+r = (sqrt(alpha).*beta) + ( sqrt( alpha.*(beta.^2) - (alpha - (r_iris^2))));
 
 r = r - r_pupil;
 
 rmat = ones(1,radiuspixels)'*r;
 
-rmat = rmat.* (ones(angledivisions+1,1)*[0:1/(radiuspixels-1):1])';
+rmat = rmat.* (ones(angulardiv,1)*[0:1/(radiuspixels-1):1])';
 rmat = rmat + r_pupil;
 
 
@@ -164,14 +160,12 @@ image(ind1) = 255;
 
 
 % write out rings overlaying original iris image
-%{
 w = cd;
 cd(DIAGPATH);
 
 imwrite(image,[eyeimage_filename,'-normal.jpg'],'jpg');
 
 cd(w);
-%}
 
 % end diagnostics
 
