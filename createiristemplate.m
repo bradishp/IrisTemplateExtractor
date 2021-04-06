@@ -34,7 +34,7 @@ angular_res = 240;
 nscales=1;
 minWaveLength=18;
 mult=1; % not applicable if using nscales = 1
-sigmaOnf=0.5;
+sigmaOnf=0.55;
 
 eyeimage = imread(eyeimageFilePath);
 [~, ~, img_channels]  = size(eyeimage);
@@ -42,33 +42,24 @@ if img_channels == 3
     eyeimage=colouredToGray(eyeimage);
 end
 
-%savefile = [eyeimage_filename,'-houghpara.mat'];
-%[stat,mess]=fileattrib(savefile);
+savefile = ['cachedSegmentedIrises/', imageName,'-houghpara.mat'];
+[stat, ~] = fileattrib(savefile);
 
-%{
-if stat == 1
+
+if false % stat == 1 % 
     % if this file has been processed before
     % then load the circle parameters and
     % noise information for that file.
-    load(savefile);
-    
+    load(savefile, 'circleiris', 'circlepupil', 'imagewithnoise');
 else
-    
     % if this file has not been processed before
     % then perform automatic segmentation and
     % save the results to a file
-    
-    [circleiris circlepupil imagewithnoise] = segmentiris(eyeimage);
-    save(savefile,'circleiris','circlepupil','imagewithnoise');
-    
+    [circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage);
+    save(savefile, 'circleiris', 'circlepupil', 'imagewithnoise');
 end
-%}
-
-[circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage);
 
 % WRITE NOISE IMAGE
-%
-
 imagewithnoise2 = uint8(imagewithnoise);
 imagewithcircles = uint8(eyeimage);
 
@@ -87,16 +78,19 @@ imagewithnoise2(ind1) = 255;
 % Write circles overlayed
 imagewithcircles(ind2) = 255;
 imagewithcircles(ind1) = 255;
+
 w = cd;
 cd(DIAGPATH);
 imwrite(imagewithnoise2, strcat(imageName,'-noise.jpg'),'jpg');
 imwrite(imagewithcircles, strcat(imageName,'-segmented.jpg'),'jpg');
 cd(w);
 
+
 % perform normalisation
 
 [polar_array, noise_array] = normaliseiris(imagewithnoise, circleiris(2),...
-    circleiris(1), circleiris(3), circlepupil(2), circlepupil(1), circlepupil(3), imageName, radial_res, angular_res);
+    circleiris(1), circleiris(3), circlepupil(2), circlepupil(1), circlepupil(3),...
+    imageName, radial_res, angular_res);
 
 
 % WRITE NORMALISED PATTERN, AND NOISE PATTERN

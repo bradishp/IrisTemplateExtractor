@@ -27,7 +27,7 @@
 function [EO, filtersum] = gaborconvolve(im, nscale, minWaveLength, mult, ...
     sigmaOnf)
 
-[rows cols] = size(im);		
+[rows, cols] = size(im);
 filtersum = zeros(1,size(im,2));
 
 EO = cell(1, nscale);          % Pre-allocate cell array
@@ -40,19 +40,19 @@ end
 logGabor  = zeros(1,ndata);
 result = zeros(rows,ndata);
 
-radius =  [0:fix(ndata/2)]/fix(ndata/2)/2;  % Frequency values 0 - 0.5
+radius =  (([0:fix(ndata/2)])/fix(ndata/2))/2;  % Frequency values 0 - 0.5
 radius(1) = 1;
 
 wavelength = minWaveLength;        % Initialize filter wavelength.
 
 
-for s = 1:nscale,                  % For each scale.  
+for s = 1:nscale                  % For each scale.
     
     % Construct the filter - first calculate the radial filter component.
     fo = 1.0/wavelength;                  % Centre frequency of filter.
     rfo = fo/0.5;                         % Normalised radius from centre of frequency plane 
     % corresponding to fo.
-    logGabor(1:ndata/2+1) = exp((-(log(radius/fo)).^2) / (2 * log(sigmaOnf)^2));  
+    logGabor(1:ndata/2+1) = exp((-(log(radius/fo)).^2) / (2 * (log(sigmaOnf))^2));
     logGabor(1) = 0;  
     
     filter = logGabor;

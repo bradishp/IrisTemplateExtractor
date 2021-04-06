@@ -10,6 +10,8 @@ for j = 1 : length(images)
     end
 
     imagepath = fullfile(subDirPath, imageName);
+    imageNameComponents = split(imageName, '.');
+    imageName = imageNameComponents{1};
 
     try
         [template, mask] = createiristemplate(imagepath, imageName);
@@ -24,9 +26,7 @@ for j = 1 : length(images)
     template = reshape(template, [], 1);
     mask = reshape(mask, [], 1);
 
-    fileNameComponents = split(imageName, '.');
-    fileName = fileNameComponents{1};
-    templateName = strcat(databaseName, "_", subDirName, "_", rlIndicator, "_", fileName);
+    templateName = strcat(databaseName, "_", subDirName, "_", rlIndicator, "_", imageName);
 
     allTemplates.(templateName) = template';
     allMasks.(templateName) = mask';

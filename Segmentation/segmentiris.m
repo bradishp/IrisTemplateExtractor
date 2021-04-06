@@ -29,10 +29,10 @@ function [circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage)
 % define range of pupil & iris radii
 
 %CASIA
-lowerPupilRadius = 28;
-upperPupilRadius = 75;
-lowerIrisRadius = 80;
-upperIrisRadius = 150;
+lowerPupilRadius = 25;
+upperPupilRadius = 80;
+lowerIrisRadius = 75;
+upperIrisRadius = 160;
 
 %    %LIONS
 %    lpupilradius = 32;
@@ -111,12 +111,11 @@ if size(lines,1) > 0
     xl = double(xl) + irisColumnLower-1;
     
     yla = max(yl);
-    
+
     y2 = 1:yla;
     
     ind3 = sub2ind(size(eyeimage),yl,xl);
     imagewithnoise(ind3) = NaN;
-    
     imagewithnoise(y2, xl) = NaN;
 end
 
@@ -137,10 +136,35 @@ if size(lines,1) > 0
     ind4 = sub2ind(size(eyeimage),yl,xl);
     imagewithnoise(ind4) = NaN;
     imagewithnoise(y2, xl) = NaN;
-    
 end
 
-%For CASIA, eliminate eyelashes by thresholding
-%ref = eyeimage < 10;
-%coords = find(ref==1);
-%imagewithnoise(coords) = NaN;
+% Eliminate eyelashes, eyelids and reflections by thresholding
+% Also eliminate anything outside the range of the iris
+irisRow = double(circleiris(1));
+irisCol = double(circleiris(2));
+irisRadius = double(circleiris(3));
+minThreshold = 75;  % Must find appropriate values for a dataset
+maxThreshold = 220;
+for j = 1:size(eyeimage, 1)
+    for i = 1:size(eyeimage, 2)
+        distToIrisCenter = pdist([j, i;irisRow, irisCol],'euclidean');
+        if distToIrisCenter > irisRadius
+            imagewithnoise(j, i) = NaN;
+        elseif eyeimage(j, i) > maxThreshold || eyeimage(j, i) < minThreshold
+            if i == 1 || isnan(imagewithnoise(j, i-1)) || j == 1 || isnan(imagewithnoise(j-1, i))
+               imagewithnoise(j, i) = NaN;
+            end
+        end
+    end
+end
+for j = size(eyeimage, 1):-1:1
+    for i = size(eyeimage, 2):-1:1
+        if isnan(imagewithnoise(j, i))
+            continue
+        elseif eyeimage(j, i) > maxThreshold || eyeimage(j, i) < minThreshold
+            if i == size(eyeimage, 2) || isnan(imagewithnoise(j, i+1)) || j == size(eyeimage, 1) || isnan(imagewithnoise(j+1, i))
+               imagewithnoise(j, i) = NaN;
+            end
+        end
+    end
+end

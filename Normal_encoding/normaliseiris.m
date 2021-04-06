@@ -47,7 +47,7 @@ radiuspixels = radpixels + 2;
 r = 0:(radiuspixels-1);
 
 angleStepSize = (2*pi)/angulardiv;
-theta = 0:angleStepSize:(2*pi) - angleStepSize;
+theta = 0:angleStepSize:(2*pi)-angleStepSize; % Range should be exclusive
 
 x_iris = double(x_iris);
 y_iris = double(y_iris);
@@ -123,10 +123,10 @@ polar_noise(coords) = 1;
 
 polar_array = double(polar_array)./255;
 
-
 % start diagnostics, writing out eye image with rings overlayed
 
 % get rid of outling points in order to write out the circular pattern
+%{
 coords = find(xo > size(image,2));
 xo(coords) = size(image,2);
 coords = find(xo < 1);
@@ -166,12 +166,10 @@ cd(DIAGPATH);
 imwrite(image,[eyeimage_filename,'-normal.jpg'],'jpg');
 
 cd(w);
-
+%}
 % end diagnostics
 
 %replace NaNs before performing feature encoding
 coords = find(isnan(polar_array));
-polar_array2 = polar_array;
-polar_array2(coords) = 0.5;
-avg = sum(sum(polar_array2)) / (size(polar_array,1)*size(polar_array,2));
+avg = mean(polar_array, 'all', 'omitnan');
 polar_array(coords) = avg;

@@ -16,9 +16,11 @@ for i = 1 : length(directory)
     % Build full path to folders. Assumes each sub folder has a L and R sub directory
     subDirPathL = fullfile(directoryName, subDirName, 'L');
     subDirPathR = fullfile(directoryName, subDirName, 'R');
+    %subDirPath = fullfile(directoryName, subDirName);
 
     [allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(databaseName, subDirName, "L", subDirPathL, allTemplates, allMasks, allMaskedTemplates);
     [allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(databaseName, subDirName, "R", subDirPathR, allTemplates, allMasks, allMaskedTemplates);
+    %[allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(databaseName, subDirName, "R", subDirPath, allTemplates, allMasks, allMaskedTemplates);
 
     templatesJson = json.dump(allTemplates);
     outputFileName = strcat(outputPath, '\', databaseName, '\Templates\', subDirName, '.json');

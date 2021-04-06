@@ -10,8 +10,8 @@ minHD = NaN;
 
 % shift template left and right, use the lowest Hamming distance
 for shifts=-8:8
-    shiftedTemplate1 = circshift(template1, shifts*scales*20);
-    shiftedMask1s = circshift(mask1, shifts*scales*20);
+    shiftedTemplate1 = circshift(template1, shifts*scales*20*2);
+    shiftedMask1s = circshift(mask1, shifts*scales*20*2);
     
     mask = shiftedMask1s | mask2;
     
