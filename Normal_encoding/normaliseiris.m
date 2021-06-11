@@ -170,6 +170,7 @@ cd(w);
 % end diagnostics
 
 %replace NaNs before performing feature encoding
+polar_array = fillmissing(polar_array,'movmean',[20,10]);
 coords = find(isnan(polar_array));
 avg = mean(polar_array, 'all', 'omitnan');
 polar_array(coords) = avg;

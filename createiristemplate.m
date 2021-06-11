@@ -46,7 +46,7 @@ savefile = ['cachedSegmentedIrises/', imageName,'-houghpara.mat'];
 [stat, ~] = fileattrib(savefile);
 
 
-if false % stat == 1 % 
+if stat == 1 % false % 
     % if this file has been processed before
     % then load the circle parameters and
     % noise information for that file.
