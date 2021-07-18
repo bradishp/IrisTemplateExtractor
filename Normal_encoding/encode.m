@@ -24,23 +24,24 @@
 % The University of Western Australia
 % November 2003
 
-function [template, mask] = encode(polar_array,noise_array, nscales, minWaveLength, mult, sigmaOnf)
+function [template, mask] = encode(polar_array, noise_array, nscales, ...
+    minWaveLength, mult, sigmaOnf)
 
 % convolve normalised region with Gabor filters
 [E0, filtersum] = gaborconvolve(polar_array, nscales, minWaveLength, mult, sigmaOnf);
 
-length = size(polar_array,2)*2*nscales;
+length = size(polar_array, 2)*2*nscales;
 
-template = zeros(size(polar_array,1), length);
+template = zeros(size(polar_array, 1), length);
 
-length2 = size(polar_array,2);
-rows = 1:size(polar_array,1);
+length2 = size(polar_array, 2);
+rows = 1:size(polar_array, 1);
 
 %create the iris template
 
 mask = zeros(size(template));
 
-for k=1:nscales
+for k = 1:nscales
     
     E1 = E0{k};
     
@@ -54,17 +55,17 @@ for k=1:nscales
     H3 = abs(E1) < 0.0001;
     
     
-    for i=0:(length2-1)
-                
+    for i = 0:(length2-1)
         ja = double(2*nscales*(i));
+
         %construct the biometric template
-        template(rows,ja+(2*k)-1) = H1(rows, i+1);
-        template(rows,ja+(2*k)) = H2(rows,i+1);
+        template(rows, ja+(2*k)-1) = H1(rows, i+1);
+        template(rows, ja+(2*k)) = H2(rows, i+1);
         
         %create noise mask
-        mask(rows,ja+(2*k)-1) = noise_array(rows, i+1) | H3(rows, i+1);
-        mask(rows,ja+(2*k)) =   noise_array(rows, i+1) | H3(rows, i+1);
-        
+        mask(rows, ja+(2*k)-1) = noise_array(rows, i+1) | H3(rows, i+1);
+        mask(rows, ja+(2*k)) =   noise_array(rows, i+1) | H3(rows, i+1);
     end
     
-end 
+end
+return

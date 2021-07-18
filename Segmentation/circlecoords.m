@@ -2,13 +2,13 @@
 %                radius and x, y coordinates of its centre.
 %
 % Usage: 
-% [x,y] = circlecoords(c, r, imgsize,nsides)
+% [x,y] = circlecoords(c, r, imSize, nsides)
 %
 % Arguments:
 %	c           - an array containing the centre coordinates of the circle
-%	              [x,y]
+%	              [x, y]
 %   r           - the radius of the circle
-%   imgsize     - size of the image array to plot coordinates onto
+%   imSize      - size of the image matrix to plot coordinates onto
 %   nsides      - the circle is actually approximated by a polygon, this
 %                 argument gives the number of sides used in this approximation. Default
 %                 is 600.
@@ -26,35 +26,33 @@
 % The University of Western Australia
 % November 2003
 
-function [x,y] = circlecoords(c, r, imgsize,nsides)
+function [xCoords, yCoords] = circlecoords(c, r, imSize, nsides)
 
-    
-    if nargin == 3
-	nsides = 600;
-    end
-    
-    nsides = round(nsides);
-    
-    a = [0:pi/nsides:2*pi];
-    xd = (double(r)*cos(a)+ double(c(1)) );
-    yd = (double(r)*sin(a)+ double(c(2)) );
-    
-    xd = round(xd);
-    yd = round(yd);
-    
-    %get rid of -ves    
-    %get rid of values larger than image
-    xd2 = xd;
-    coords = find(xd>imgsize(2));
-    xd2(coords) = imgsize(2);
-    coords = find(xd<=0);
-    xd2(coords) = 1;
-    
-    yd2 = yd;
-    coords = find(yd>imgsize(1));
-    yd2(coords) = imgsize(1);
-    coords = find(yd<=0);
-    yd2(coords) = 1;
-    
-    x = int32(xd2);
-    y = int32(yd2);   
+if nargin == 3
+    nsides = 600;
+end
+
+nsides = round(nsides);
+
+a = 0:pi/nsides:2*pi;
+xCoords = (double(r)*cos(a)+ double(c(1)));
+yCoords = (double(r)*sin(a)+ double(c(2)));
+
+xCoords = round(xCoords);
+yCoords = round(yCoords);
+
+%get rid of values outside range of the image
+valid = xCoords > imSize(2);
+xCoords(valid) = imSize(2);
+valid = xCoords < 1;
+xCoords(valid) = 1;
+
+valid = yCoords > imSize(1);
+yCoords(valid) = imSize(1);
+valid = yCoords < 1;
+yCoords(valid) = 1;
+
+xCoords = int32(xCoords);
+yCoords = int32(yCoords);
+
+return

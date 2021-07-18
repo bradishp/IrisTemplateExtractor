@@ -1,5 +1,6 @@
 function [allTemplates, allMasks, allMaskedTemplates] = ...
-    getTemplatesFromFolder(databaseName, subDirName, rlIndicator, subDirPath, allTemplates, allMasks, allMaskedTemplates)
+    getTemplatesFromFolder(databaseName, subDirName, rlIndicator, ...
+        subDirPath, allTemplates, allMasks, allMaskedTemplates)
 
 images = dir(subDirPath);
 for j = 1 : length(images)
@@ -32,4 +33,5 @@ for j = 1 : length(images)
     allMasks.(templateName) = mask';
     allMaskedTemplates.(templateName) = maskedTemplate';
 end
-end
+
+return

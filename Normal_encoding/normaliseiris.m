@@ -37,10 +37,8 @@
 % The University of Western Australia
 % November 2003
 
-function [polar_array, polar_noise] = normaliseiris(image, x_iris, y_iris, r_iris,...
-x_pupil, y_pupil, r_pupil,eyeimage_filename, radpixels, angulardiv)
-
-global DIAGPATH
+function [polar_array, polar_noise] = normaliseiris(eyeImage, x_iris, y_iris, ...
+    r_iris, x_pupil, y_pupil, r_pupil, eyeImageFilename, radpixels, angulardiv)
 
 radiuspixels = radpixels + 2;
 
@@ -69,10 +67,7 @@ else
     sgn = 1;
 end
 
-r = double(r);
-theta = double(theta);
-
-alpha = ones(1,angulardiv)* (ox^2 + oy^2);
+alpha = ones(1,angulardiv) * (ox^2 + oy^2);
 
 % need to do something for ox = 0
 if ox == 0
@@ -90,7 +85,7 @@ r = r - r_pupil;
 
 rmat = ones(1,radiuspixels)'*r;
 
-rmat = rmat.* (ones(angulardiv,1)*[0:1/(radiuspixels-1):1])';
+rmat = rmat .* (ones(angulardiv,1)*(0:1/(radiuspixels-1):1))';
 rmat = rmat + r_pupil;
 
 
@@ -111,66 +106,71 @@ yo = rmat.*xsinmat;
 xo = x_pupil+xo;
 yo = y_pupil-yo;
 
+%saveNormalisationImage(eyeImage, x_iris, y_iris, r_iris, x_pupil, y_pupil, ...
+%    r_pupil, xo, yo, eyeImageFilename);
+
 % extract intensity values into the normalised polar representation through
 % interpolation
-[x,y] = meshgrid(1:size(image,2),1:size(image,1));  
-polar_array = interp2(x,y,image,xo,yo);
+[x,y] = meshgrid(1:size(eyeImage,2), 1:size(eyeImage,1));
+polar_array = interp2(x, y, eyeImage, xo, yo);
 
 % create noise array with location of NaNs in polar_array
 polar_noise = zeros(size(polar_array));
-coords = find(isnan(polar_array));
+coords = isnan(polar_array);
 polar_noise(coords) = 1;
 
 polar_array = double(polar_array)./255;
 
-% start diagnostics, writing out eye image with rings overlayed
+% Replace NaNs before performing feature encoding
+coords = isnan(polar_array);
+avg = mean(polar_array, 'all', 'omitnan');
+polar_array(coords) = avg;
+
+return
+
+
+
+
+% Run diagnostics, writing out eye image with rings overlayed
+function saveNormalisationImage(eyeImage, x_iris, y_iris, r_iris, x_pupil, ...
+    y_pupil, r_pupil, xo, yo, eyeimage_filename)
+
+global DIAGPATH
 
 % get rid of outling points in order to write out the circular pattern
-%{
-coords = find(xo > size(image,2));
-xo(coords) = size(image,2);
-coords = find(xo < 1);
-xo(coords) = 1;
+invalid = xo > size(eyeImage, 2);
+xo(invalid) = size(eyeImage, 2);
+invalid = xo < 1;
+xo(invalid) = 1;
 
-coords = find(yo > size(image,1));
-yo(coords) = size(image,1);
-coords = find(yo<1);
-yo(coords) = 1;
+invalid = yo > size(eyeImage,1);
+yo(invalid) = size(eyeImage,1);
+invalid = yo < 1;
+yo(invalid) = 1;
 
 xo = round(xo);
 yo = round(yo);
 
-xo = int32(xo);
-yo = int32(yo);
 
-ind1 = sub2ind(size(image),double(yo),double(xo));
+eyeImage = uint8(eyeImage);
 
-image = uint8(image);
+pointIndexes = sub2ind(size(eyeImage), yo, xo);
+eyeImage(pointIndexes) = 255;
 
-image(ind1) = 255;
-%get pixel coords for circle around iris
-[x,y] = circlecoords([x_iris,y_iris],r_iris,size(image));
-ind2 = sub2ind(size(image),double(y),double(x));
-%get pixel coords for circle around pupil
-[xp,yp] = circlecoords([x_pupil,y_pupil],r_pupil,size(image));
-ind1 = sub2ind(size(image),double(yp),double(xp));
+% get pixel coords for circle around iris
+[x,y] = circlecoords([x_iris, y_iris], r_iris, size(eyeImage));
+irisRingIndexes = sub2ind(size(eyeImage), double(y), double(x));
+eyeImage(irisRingIndexes) = 255;
 
-image(ind2) = 255;
-image(ind1) = 255;
-
+% get pixel coords for circle around pupil
+[xp, yp] = circlecoords([x_pupil, y_pupil], r_pupil, size(eyeImage));
+pupilRingIndexes = sub2ind(size(eyeImage), double(yp), double(xp));
+eyeImage(pupilRingIndexes) = 255;
 
 % write out rings overlaying original iris image
 w = cd;
 cd(DIAGPATH);
-
-imwrite(image,[eyeimage_filename,'-normal.jpg'],'jpg');
-
+imwrite(eyeImage, [eyeimage_filename,'-normal.jpg'],'jpg');
 cd(w);
-%}
-% end diagnostics
 
-%replace NaNs before performing feature encoding
-polar_array = fillmissing(polar_array,'movmean',[20,10]);
-coords = find(isnan(polar_array));
-avg = mean(polar_array, 'all', 'omitnan');
-polar_array(coords) = avg;
+return

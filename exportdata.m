@@ -34,4 +34,5 @@ for i = 1 : length(directory)
     outputFileName = strcat(outputPath, '\', databaseName, '\MaskedTemplates\', subDirName, '.json');
     json.write(maskedTemplatesJson, outputFileName);
 end
-end
+
+return

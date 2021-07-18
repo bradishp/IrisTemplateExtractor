@@ -33,7 +33,7 @@
 
 function bw = hysthresh(im, T1, T2)
 
-if (T2 > T1 | T2 < 0 | T1 < 0)  % Check thesholds are sensible
+if (T2 > T1 || T2 < 0 || T1 < 0)  % Check thesholds are sensible
   error('T1 must be >= T2 and both must be >= 0 ');
 end
 
@@ -72,7 +72,7 @@ while stp ~= 0            % While the stack is not empty
     v = stack(stp);         % Pop next index off the stack
     stp = stp - 1;
     
-    if v > rp1 & v < rcmr   % Prevent us from generating illegal indices
+    if v > rp1 && v < rcmr   % Prevent us from generating illegal indices
 			    % Now look at surrounding pixels to see if they
                             % should be pushed onto the stack to be
                             % processed as well.

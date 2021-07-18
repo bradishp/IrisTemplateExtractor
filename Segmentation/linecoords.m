@@ -5,13 +5,14 @@
 %
 % Arguments:
 %	lines       - an array containing parameters of the line in
-%                 form
-%   imsize      - size of the image, needed so that x y coordinates
+%                 form a*x + b*y + c where a, b and c are the three
+%                 elements in the array
+%   imSize      - size of the image, needed so that x y coordinates
 %                 are within the image boundary
 %
 % Output:
-%	x           - x coordinates
-%	y           - corresponding y coordinates
+%	xCoords     - x coordinates
+%	yCoords     - corresponding y coordinates
 %
 % Author: 
 % Libor Masek
@@ -20,15 +21,17 @@
 % The University of Western Australia
 % November 2003
 
-function [x,y] = linecoords(lines, imsize)
+function [xCoords, yCoords] = linecoords(lines, imSize)
 
-xd = [1:imsize(2)];
-yd = (-lines(3) - lines(1)*xd ) / lines(2);
+xCoords = 1:imSize(2);
+yCoords = (-lines(3) - lines(1)*xCoords ) / lines(2);
 
-coords = find(yd>imsize(1));
-yd(coords) = imsize(1);
-coords = find(yd<1);
-yd(coords) = 1;
+invalid = yCoords > imSize(1);
+yCoords(invalid) = imSize(1);
+invalid = yCoords < 1;
+yCoords(invalid) = 1;
 
-x = int32(xd);
-y = int32(yd);   
+xCoords = int32(xCoords);
+yCoords = int32(yCoords);
+
+return
