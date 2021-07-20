@@ -18,21 +18,33 @@ for i = 1 : length(directory)
     subDirPathR = fullfile(directoryName, subDirName, 'R');
     %subDirPath = fullfile(directoryName, subDirName);
 
-    [allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(databaseName, subDirName, "L", subDirPathL, allTemplates, allMasks, allMaskedTemplates);
-    [allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(databaseName, subDirName, "R", subDirPathR, allTemplates, allMasks, allMaskedTemplates);
-    %[allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(databaseName, subDirName, "R", subDirPath, allTemplates, allMasks, allMaskedTemplates);
+    [allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(...
+        databaseName, subDirName, "L", subDirPathL, allTemplates, allMasks, allMaskedTemplates);
+    [allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(...
+        databaseName, subDirName, "R", subDirPathR, allTemplates, allMasks, allMaskedTemplates);
+    %[allTemplates, allMasks, allMaskedTemplates] = getTemplatesFromFolder(...
+    %   databaseName, subDirName, "R", subDirPath, allTemplates, allMasks, allMaskedTemplates);
 
-    templatesJson = json.dump(allTemplates);
-    outputFileName = strcat(outputPath, '\', databaseName, '\Templates\', subDirName, '.json');
-    json.write(templatesJson, outputFileName);
+    templatesJson = jsonencode(allTemplates);
+    outputFileName = strcat(outputPath, '\', databaseName, '\Templates\', ...
+        subDirName, '.json');
+    fileID = fopen(outputFileName, 'w');
+    fprintf(fileID, templatesJson);
+    fclose(fileID);
 
-    masksJson = json.dump(allMasks);
-    outputFileName = strcat(outputPath, '\', databaseName, '\Masks\', subDirName, '.json');
-    json.write(masksJson, outputFileName);
+    masksJson = jsonencode(allMasks);
+    outputFileName = strcat(outputPath, '\', databaseName, '\Masks\', ...
+        subDirName, '.json');
+    fileID = fopen(outputFileName, 'w');
+    fprintf(fileID, masksJson);
+    fclose(fileID);
 
-    maskedTemplatesJson = json.dump(allMaskedTemplates);
-    outputFileName = strcat(outputPath, '\', databaseName, '\MaskedTemplates\', subDirName, '.json');
-    json.write(maskedTemplatesJson, outputFileName);
+    maskedTemplatesJson = jsonencode(allMaskedTemplates);
+    outputFileName = strcat(outputPath, '\', databaseName, '\MaskedTemplates\', ...
+        subDirName, '.json');
+    fileID = fopen(outputFileName, 'w');
+    fprintf(fileID, maskedTemplatesJson);
+    fclose(fileID);
 end
 
 return
