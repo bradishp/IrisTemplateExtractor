@@ -42,8 +42,6 @@ function [polar_array, polar_noise] = normaliseiris(eyeImage, x_iris, y_iris, ..
 
 radiuspixels = radpixels + 2;
 
-r = 0:(radiuspixels-1);
-
 angleStepSize = (2*pi)/angulardiv;
 theta = 0:angleStepSize:(2*pi)-angleStepSize; % Range should be exclusive
 

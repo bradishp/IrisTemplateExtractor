@@ -39,10 +39,10 @@ sigmaOnf=0.55;
 eyeimage = imread(eyeimageFilePath);
 [~, ~, img_channels]  = size(eyeimage);
 if img_channels == 3
-    eyeimage=colouredToGray(eyeimage);
+    eyeimage = rgb2gray(eyeimage);
 end
 
-savefile = ['cachedSegmentedIrises/', imageName,'-houghpara.mat'];
+savefile = ['cachedSegmentedIrises/', imageName, '-houghpara.mat'];
 [stat, ~] = fileattrib(savefile);
 
 
@@ -57,6 +57,10 @@ else
     % save the results to a file
     [circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage);
     save(savefile, 'circleiris', 'circlepupil', 'imagewithnoise');
+end
+
+if checkPupilWithinIris(circleiris, circlepupil)
+    error("Pupil is not entirely within the iris");
 end
 
 % WRITE NOISE IMAGE
@@ -84,7 +88,6 @@ cd(DIAGPATH);
 imwrite(imagewithnoise2, strcat(imageName,'-noise.jpg'),'jpg');
 imwrite(imagewithcircles, strcat(imageName,'-segmented.jpg'),'jpg');
 cd(w);
-
 
 % perform normalisation
 

@@ -45,15 +45,10 @@ I3 = adjgamma(I2, 1.9);
 I4 = nonmaxsup(I3, orientation, 1.5);
 edgeimage = hysthresh(I4, highThresh, lowThresh);
 
-% Perform the circular Hough transform.
-houghSpace = houghcircle(edgeimage, lowerRadiusScaled, upperRadiusScaled);
-
-% Find the maximum in the Hough space, and hence
-% the parameters of the circle.
-[~, maxInd] = max(houghSpace, [], 'all', 'linear');
-[row, col, radius] = ind2sub(size(houghSpace), maxInd);
+% Find the maximum in the Hough space, and hence the parameters of the circle.
+[row, col, radius] = getHoughCircle(edgeimage, lowerRadiusScaled, upperRadiusScaled);
 
 % Rescale radius and coordinates
-radius = (radius(1) + lowerRadiusScaled) / scaling;
+radius = radius(1) / scaling;
 col = int32(col(1) / scaling);
 row = int32(row(1) / scaling);
