@@ -1,3 +1,18 @@
+% exportdata - Get all iris templates from a folder of iris images
+%
+% Usage:
+% function exportdata(directoryName, outputPath, databaseName)
+%
+% Arguments:
+%           directoryName   - the directory name to search for iris images
+%           outputPath      - the path to where the json file results should
+%                             be placed
+%           databaseName    - the folder located at the path which the
+%                             results should be placed in. Also used to
+%                             construct identifiers for the irises.
+%
+% Authors: Philip Bradish and Sarang Chaudhari
+% February 2021
 function exportdata(directoryName, outputPath, databaseName)
 
 directory =  dir(directoryName);
@@ -45,6 +60,47 @@ for i = 1 : length(directory)
     fileID = fopen(outputFileName, 'w');
     fprintf(fileID, maskedTemplatesJson);
     fclose(fileID);
+end
+
+return
+
+
+% Helper function to get all iris templates from the left/right subfolder
+function [allTemplates, allMasks, allMaskedTemplates] = ...
+    getTemplatesFromFolder(databaseName, subDirName, rlIndicator, ...
+        subDirPath, allTemplates, allMasks, allMaskedTemplates)
+
+images = dir(subDirPath);
+for j = 1 : length(images)
+    imageName = images(j).name;
+
+    if(isequal(imageName, '.') ||  isequal(imageName, '..' ))
+        continue;
+    end
+
+    imagepath = fullfile(subDirPath, imageName);
+    % Get image name without extension
+    imageNameComponents = split(imageName, '.');
+    imageName = imageNameComponents{1};
+
+    try
+        [template, mask] = createiristemplate(imagepath, imageName);
+    catch e
+        disp('Error getting iris template of ' + imagepath);
+        disp(e);
+        continue;
+    end
+
+    maskedTemplate = double(template & ~mask);
+    maskedTemplate = reshape(maskedTemplate, [], 1);
+    template = reshape(template, [], 1);
+    mask = reshape(mask, [], 1);
+
+    templateName = strcat(databaseName, "_", subDirName, "_", rlIndicator, "_", imageName);
+
+    allTemplates.(templateName) = template';
+    allMasks.(templateName) = mask';
+    allMaskedTemplates.(templateName) = maskedTemplate';
 end
 
 return

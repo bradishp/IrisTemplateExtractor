@@ -71,8 +71,10 @@ avg = mean(imageWithNoise, 'all', 'omitnan');
 stdeviation = std(imageWithNoise, 0, 'all', 'omitnan');
 
 % Adjust these values for datasets
-upperThreshold = max(2 * stdeviation, 40);
-lowerThreshold = max(2 * stdeviation, 40);
+% Set minimum values to prevent large portions of the iris from being
+% classified as noise in the event the stdeviation is very small
+upperThreshold = max(2 * stdeviation, 35);
+lowerThreshold = max(2 * stdeviation, 35);
 
 noiseFlags = ~logical(validIris);
 noiseFlags(pupilRegion) = false;
