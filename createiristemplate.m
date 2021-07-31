@@ -2,14 +2,15 @@
 % an eye image.
 %
 % Usage: 
-% [template, mask] = createiristemplate(eyeimage_filename)
+% [template, mask] = createiristemplate(eyeImageFilePath, imageName)
 %
 % Arguments:
-%	eyeimage_filename   - the file name of the eye image
+%	eyeImageFilePath   - the complete path to the eye image
+%	imageName          - the name of the image used for labeling diagnostics
 %
 % Output:
-%	template		    - the binary iris biometric template
-%	mask			    - the binary iris noise mask
+%	template		   - the binary iris biometric template
+%	mask			   - the binary iris noise mask
 %
 % Author: 
 % Libor Masek
@@ -18,90 +19,88 @@
 % The University of Western Australia
 % November 2003
 
-function [template, mask] = createiristemplate(eyeimageFilePath, imageName)
+function [template, mask] = createiristemplate(eyeImageFilePath, imageName)
 
-% path for writing diagnostic images
+% Path for writing diagnostic images
 global DIAGPATH
 DIAGPATH = 'diagnostics';
 
-%normalisation parameters
-radial_res = 20;
-angular_res = 240;
-% with these settings a 9600 bit iris template is
-% created
+% Normalisation parameters
+% Can adjust these for datasets
+radialRes = 20;
+angularRes = 240;
+% With these settings a 9600 bit iris template is created
 
-%feature encoding parameters
+% Feature encoding parameters
+% Can adjust these for datasets
 nscales=1;
 minWaveLength=18;
 mult=1; % not applicable if using nscales = 1
-sigmaOnf=0.55;
+sigmaOnf=0.5;
 
-eyeimage = imread(eyeimageFilePath);
-[~, ~, img_channels]  = size(eyeimage);
+eyeImage = imread(eyeImageFilePath);
+[~, ~, img_channels]  = size(eyeImage);
 if img_channels == 3
-    eyeimage = rgb2gray(eyeimage);
+    eyeImage = rgb2gray(eyeImage);
 end
 
 savefile = ['cachedSegmentedIrises/', imageName, '-houghpara.mat'];
 [stat, ~] = fileattrib(savefile);
 
-
-if stat == 1 % false % 
-    % if this file has been processed before
-    % then load the circle parameters and
-    % noise information for that file.
-    load(savefile, 'circleiris', 'circlepupil', 'imagewithnoise');
+if stat == 1
+    % If this file has been processed before then load the circle
+    % parameters and noise information for that file.
+    load(savefile, 'irisCircle', 'pupilCircle', 'imageWithNoise');
 else
-    % if this file has not been processed before
-    % then perform automatic segmentation and
-    % save the results to a file
-    [circleiris, circlepupil, imagewithnoise] = segmentiris(eyeimage);
-    save(savefile, 'circleiris', 'circlepupil', 'imagewithnoise');
+    % If this file has not been processed before then perform automatic
+    % segmentation and save the results to a file
+    [irisCircle, pupilCircle, imageWithNoise] = segmentiris(eyeImage);
+    save(savefile, 'irisCircle', 'pupilCircle', 'imageWithNoise');
 end
 
-if checkPupilWithinIris(circleiris, circlepupil)
+if checkPupilWithinIris(irisCircle, pupilCircle)
     error("Pupil is not entirely within the iris");
 end
 
 % WRITE NOISE IMAGE
-imagewithnoise2 = uint8(imagewithnoise);
-imagewithcircles = uint8(eyeimage);
+imageWithCircles = uint8(eyeImage);
+noiseImageWithCircles = uint8(imageWithNoise);
 
-%get pixel coords for circle around iris
-[x,y] = circlecoords([circleiris(2),circleiris(1)],circleiris(3),size(eyeimage));
-ind2 = sub2ind(size(eyeimage),double(y),double(x)); 
+% Get pixel coords for circle around iris
+[x,y] = circlecoords([irisCircle(2), irisCircle(1)], irisCircle(3), size(eyeImage));
+outerBorder = sub2ind(size(eyeImage), double(y), double(x));
 
-%get pixel coords for circle around pupil
-[xp,yp] = circlecoords([circlepupil(2),circlepupil(1)],circlepupil(3),size(eyeimage));
-ind1 = sub2ind(size(eyeimage),double(yp),double(xp));
+% Get pixel coords for circle around pupil
+[xp,yp] = circlecoords([pupilCircle(2), pupilCircle(1)], pupilCircle(3), size(eyeImage));
+innerBorder = sub2ind(size(eyeImage), double(yp), double(xp));
 
 
 % Write noise regions
-imagewithnoise2(ind2) = 255;
-imagewithnoise2(ind1) = 255;
+noiseImageWithCircles(outerBorder) = 255;
+noiseImageWithCircles(innerBorder) = 255;
 % Write circles overlayed
-imagewithcircles(ind2) = 255;
-imagewithcircles(ind1) = 255;
+imageWithCircles(outerBorder) = 255;
+imageWithCircles(innerBorder) = 255;
 
 w = cd;
 cd(DIAGPATH);
-imwrite(imagewithnoise2, strcat(imageName,'-noise.jpg'),'jpg');
-imwrite(imagewithcircles, strcat(imageName,'-segmented.jpg'),'jpg');
+imwrite(noiseImageWithCircles, strcat(imageName, '-noise.jpg'), 'jpg');
+imwrite(imageWithCircles, strcat(imageName, '-segmented.jpg'), 'jpg');
 cd(w);
 
-% perform normalisation
-
-[polar_array, noise_array] = normaliseiris(imagewithnoise, circleiris(2),...
-    circleiris(1), circleiris(3), circlepupil(2), circlepupil(1), circlepupil(3),...
-    imageName, radial_res, angular_res);
+% Perform normalisation
+[polarArray, noiseArray] = normaliseiris(imageWithNoise, irisCircle(2),...
+    irisCircle(1), irisCircle(3), pupilCircle(2), pupilCircle(1), pupilCircle(3),...
+    imageName, radialRes, angularRes);
 
 
 % WRITE NORMALISED PATTERN, AND NOISE PATTERN
 w = cd;
 cd(DIAGPATH);
-imwrite(polar_array, strcat(imageName,'-polar.jpg'),'jpg');
-imwrite(noise_array, strcat(imageName,'-polarnoise.jpg'),'jpg');
+imwrite(polarArray, strcat(imageName, '-polar.jpg'), 'jpg');
+imwrite(noiseArray, strcat(imageName, '-polarnoise.jpg'), 'jpg');
 cd(w);
 
 % perform feature encoding
-[template, mask] = encode(polar_array, noise_array, nscales, minWaveLength, mult, sigmaOnf);
+[template, mask] = encode(polarArray, noiseArray, nscales, minWaveLength, ...
+    mult, sigmaOnf);

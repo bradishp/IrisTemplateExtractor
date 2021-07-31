@@ -6,7 +6,7 @@
 % lines = findline(image)
 %
 % Arguments:
-%	image   - the input image
+%	im      - the input image
 %
 % Output:
 %	lines   - parameters of the detected line in polar form
@@ -18,9 +18,9 @@
 % The University of Western Australia
 % November 2003
 
-function lines = findline(image)
+function lines = findline(im)
 
-[I2, orientation] = canny(image, 2, 1, 0.00, 1.00);
+[I2, orientation] = canny(im, 2, 1, 0.00, 1.00);
 
 I3 = adjgamma(I2, 1.9);
 I4 = nonmaxsup(I3, orientation, 1.5);
@@ -41,8 +41,8 @@ radialDist = radialCoords(y);
 
 lines = [cos(thetaRad), sin(thetaRad), -radialDist];
 
-cx = (size(image,2) / 2) - 1;
-cy = (size(image,1) / 2) - 1;
-lines(:,3) = lines(:,3) - lines(:,1) * cx - lines(:,2) * cy;
+cx = (size(im, 2) / 2) - 1;
+cy = (size(im, 1) / 2) - 1;
+lines(:, 3) = lines(:, 3) - lines(:, 1) * cx - lines(:, 2) * cy;
 
 return

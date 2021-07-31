@@ -1,7 +1,7 @@
 % gaborconvolve - function for convolving each row of an image with 1D log-Gabor filters
 %
 % Usage: 
-% [template, mask] = createiristemplate(eyeimage_filename)
+% [EO, filtersum] = gaborconvolve(im, nscale, minWaveLength, mult, sigmaOnf)
 %
 % Arguments:
 %   im              - the image to convolve
@@ -34,7 +34,7 @@ EO = cell(1, nscale);          % Pre-allocate cell array
 
 ndata = cols;
 if mod(ndata,2) == 1             % If there is an odd No of data points 
-    ndata = ndata-1;               % throw away the last one.
+    ndata = ndata-1;             % throw away the last one.
 end
 
 logGabor  = zeros(1, ndata);
@@ -48,10 +48,8 @@ wavelength = minWaveLength;        % Initialize filter wavelength.
 
 for s = 1:nscale                  % For each scale.
     
-    % Construct the filter - first calculate the radial filter component.
+    % Construct the filter
     fo = 1.0/wavelength;                  % Centre frequency of filter.
-    rfo = fo/0.5;                         % Normalised radius from centre of frequency plane 
-    % corresponding to fo.
     logGabor(1:ndata/2+1) = exp((-(log(radius/fo)).^2) / (2 * (log(sigmaOnf))^2));
     logGabor(1) = 0;  
     
@@ -59,18 +57,18 @@ for s = 1:nscale                  % For each scale.
     
     filtersum = filtersum+filter;
     
-    % for each row of the input image, do the convolution, back transform
+    % For each row of the input image, do the convolution, back transform
     for r = 1:rows	% For each row
         signal = im(r,1:ndata);
         imagefft = fft(signal);
         result(r, :) = ifft(imagefft .* filter);
     end
     
-    % save the ouput for each scale
+    % Save the ouput for each scale
     EO{s} = result;
-    
-    wavelength = wavelength * mult;       % Finally calculate Wavelength of next filter
-end                                     % ... and process the next scale
+    % Finally calculate Wavelength of next filter
+    wavelength = wavelength * mult;
+end
 
 filtersum = fftshift(filtersum);
 return

@@ -43,9 +43,9 @@ iradius = ceil(radius);
 
 % Precalculate x and y offsets relative to centre pixel for each orientation angle 
 
-angle = [0:180].*pi/180;    % Array of angles in 1 degree increments (but in radians).
-xoff = radius*cos(angle);   % x and y offset of points at specified radius and angle
-yoff = radius*sin(angle);   % from each reference position.
+angle = (0:180) .* pi/180;  % Array of angles in 1 degree increments (but in radians).
+xoff = radius * cos(angle); % x and y offset of points at specified radius and angle
+yoff = radius * sin(angle); % from each reference position.
 
 hfrac = xoff - floor(xoff); % Fractional offset of xoff relative to integer location
 vfrac = yoff - floor(yoff); % Fractional offset of yoff relative to integer location

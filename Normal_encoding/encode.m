@@ -2,12 +2,12 @@
 % also generates corresponding noise mask
 %
 % Usage: 
-% [template, mask] = encode(polar_array,noise_array, nscales,...
+% [template, mask] = encode(polarArray, noiseArray, nscales,...
 % minWaveLength, mult, sigmaOnf)
 %
 % Arguments:
-% polar_array       - normalised iris region
-% noise_array       - corresponding normalised noise region map
+% polarArray        - normalised iris region
+% noiseArray        - corresponding normalised noise region map
 % nscales           - number of filters to use in encoding
 % minWaveLength     - base wavelength
 % mult              - multicative factor between each filter
@@ -24,20 +24,18 @@
 % The University of Western Australia
 % November 2003
 
-function [template, mask] = encode(polar_array, noise_array, nscales, ...
+function [template, mask] = encode(polarArray, noiseArray, nscales, ...
     minWaveLength, mult, sigmaOnf)
 
 % convolve normalised region with Gabor filters
-[E0, filtersum] = gaborconvolve(polar_array, nscales, minWaveLength, mult, sigmaOnf);
+[E0, filtersum] = gaborconvolve(polarArray, nscales, minWaveLength, mult, sigmaOnf);
 
-length = size(polar_array, 2)*2*nscales;
+templateWidth = size(polarArray, 2) * 2 * nscales;
 
-template = zeros(size(polar_array, 1), length);
+template = zeros(size(polarArray, 1), templateWidth);
 
-length2 = size(polar_array, 2);
-rows = 1:size(polar_array, 1);
-
-%create the iris template
+polarWidth = size(polarArray, 2);
+rows = 1:size(polarArray, 1);
 
 mask = zeros(size(template));
 
@@ -55,16 +53,16 @@ for k = 1:nscales
     H3 = abs(E1) < 0.0001;
     
     
-    for i = 0:(length2-1)
-        ja = double(2*nscales*(i));
+    for i = 0:(polarWidth-1)
+        colOffset = double(2 * nscales * (i));
 
         %construct the biometric template
-        template(rows, ja+(2*k)-1) = H1(rows, i+1);
-        template(rows, ja+(2*k)) = H2(rows, i+1);
+        template(rows, colOffset+(2*k)-1) = H1(rows, i+1);
+        template(rows, colOffset+(2*k)) = H2(rows, i+1);
         
         %create noise mask
-        mask(rows, ja+(2*k)-1) = noise_array(rows, i+1) | H3(rows, i+1);
-        mask(rows, ja+(2*k)) =   noise_array(rows, i+1) | H3(rows, i+1);
+        mask(rows, colOffset+(2*k)-1) = noiseArray(rows, i+1) | H3(rows, i+1);
+        mask(rows, colOffset+(2*k)) =   noiseArray(rows, i+1) | H3(rows, i+1);
     end
     
 end

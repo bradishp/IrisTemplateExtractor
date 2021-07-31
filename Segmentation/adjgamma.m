@@ -15,22 +15,22 @@
 % pk@cs.uwa.edu.au     www.cs.uwa.edu.au/~pk
 % July 2001
 
-function newim = adjgamma(im, g)
+function newIm = adjgamma(im, g)
 
 if g <= 0
     error('Gamma value must be > 0');
 end
 
-if isa(im,'uint8')
-    newim = double(im);
+if isa(im, 'uint8')
+    newIm = double(im);
 else
-    newim = im;
+    newIm = im;
 end
 
-% rescale range 0-1
-newim = newim - min(newim, [], 'all');
-newim = newim ./ max(newim, [], 'all');
+% Rescale range 0-1
+newIm = newIm - min(newIm, [], 'all');
+newIm = newIm ./ max(newIm, [], 'all');
 
-newim =  newim .^ (1/g);   % Apply gamma function
+newIm =  newIm .^ (1/g);   % Apply gamma function
 
 return

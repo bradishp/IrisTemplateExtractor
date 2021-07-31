@@ -44,16 +44,14 @@ rp1 = rows+1;
 
 bw = im(:);                 % Make image into a column vector
 pix = find(bw > T1);        % Find indices of all pixels with value > T1
-npix = size(pix,1);         % Find the number of pixels with value > T1
+npix = size(pix, 1);        % Find the number of pixels with value > T1
 
-stack = zeros(rows*cols,1); % Create a stack array (that should never
+stack = zeros(rows*cols, 1); % Create a stack array (that should never
                             % overflow!)
 
 stack(1:npix) = pix;        % Put all the edge points on the stack
 stp = npix;                 % set stack pointer
-for k = 1:npix
-    bw(pix(k)) = -1;        % mark points as edges
-end
+bw(pix(1:npix)) = -1;       % mark points as edges
 
 
 % Precompute an array, O, of index offset values that correspond to the eight 
@@ -72,23 +70,21 @@ while stp ~= 0            % While the stack is not empty
     v = stack(stp);         % Pop next index off the stack
     stp = stp - 1;
     
-    if v > rp1 && v < rcmr   % Prevent us from generating illegal indices
-			    % Now look at surrounding pixels to see if they
-                            % should be pushed onto the stack to be
-                            % processed as well.
-       index = O+v;	    % Calculate indices of points around this pixel.	    
-       for l = 1:8
-	   ind = index(l);
-	   if bw(ind) > T2   % if value > T2,
-	       stp = stp+1;  % push index onto the stack.
-	       stack(stp) = ind;
-	       bw(ind) = -1; % mark this as an edge point
-	   end
-       end
-    end
+	if v > rp1 && v < rcmr   % Prevent us from generating illegal indices
+        % Now look at surrounding pixels to see if they
+        % should be pushed onto the stack to be% processed as well.
+        index = O+v;	    % Calculate indices of points around this pixel.	    
+        for l = 1:8
+            ind = index(l);
+            if bw(ind) > T2   % if value > T2,
+                stp = stp+1;  % push index onto the stack.
+                stack(stp) = ind;
+                bw(ind) = -1; % mark this as an edge point
+            end
+        end
+	end
 end
 
-
-
 bw = (bw == -1);            % Finally zero out anything that was not an edge 
-bw = reshape(bw,rows,cols); % and reshape the image
+bw = reshape(bw, rows, cols); % and reshape the image
+

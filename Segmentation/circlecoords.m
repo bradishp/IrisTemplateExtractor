@@ -2,16 +2,16 @@
 %                radius and x, y coordinates of its centre.
 %
 % Usage: 
-% [x,y] = circlecoords(c, r, imSize, nsides)
+% [x,y] = circlecoords(c, r, imSize, nSides)
 %
 % Arguments:
 %	c           - an array containing the centre coordinates of the circle
 %	              [x, y]
 %   r           - the radius of the circle
 %   imSize      - size of the image matrix to plot coordinates onto
-%   nsides      - the circle is actually approximated by a polygon, this
-%                 argument gives the number of sides used in this approximation. Default
-%                 is 600.
+%   nSides      - the circle is actually approximated by a polygon, this
+%                 argument gives the number of sides used in this
+%                 approximation. Default is 600.
 %
 % Output:
 %	x		    - an array containing x coordinates of circle boundary
@@ -26,17 +26,17 @@
 % The University of Western Australia
 % November 2003
 
-function [xCoords, yCoords] = circlecoords(c, r, imSize, nsides)
+function [xCoords, yCoords] = circlecoords(c, r, imSize, nSides)
 
 if nargin == 3
-    nsides = 600;
+    nSides = 600;
 end
 
-nsides = round(nsides);
+nSides = round(nSides);
 
-a = 0:pi/nsides:2*pi;
-xCoords = (double(r)*cos(a)+ double(c(1)));
-yCoords = (double(r)*sin(a)+ double(c(2)));
+a = 0:pi/nSides:2*pi;
+xCoords = (double(r)*cos(a) + double(c(1)));
+yCoords = (double(r)*sin(a) + double(c(2)));
 
 xCoords = round(xCoords);
 yCoords = round(yCoords);

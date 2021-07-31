@@ -31,13 +31,13 @@
 
 function [gradient, or] = canny(im, sigma, scaling, vert, horz)
 
-xscaling = vert;
-yscaling = horz;
+xScaling = vert;
+yScaling = horz;
 
-hsize = [6*sigma+1, 6*sigma+1];   % The filter size.
+hSize = [6*sigma+1, 6*sigma+1];   % The filter size.
 
-gaussian = fspecial('gaussian',hsize,sigma);
-im = filter2(gaussian,im);        % Smoothed image.
+gaussian = fspecial('gaussian', hSize, sigma);
+im = filter2(gaussian, im);        % Smoothed image.
 
 im = imresize(im, scaling);
 
@@ -50,8 +50,8 @@ d1 = [  im(2:rows,2:cols) zeros(rows-1,1); zeros(1,cols) ] - ...
 d2 = [  zeros(1,cols); im(1:rows-1,2:cols) zeros(rows-1,1);  ] - ...
                                [ zeros(rows-1,1) im(2:rows,1:cols-1); zeros(1,cols)   ];
 
-X = ( h + (d1 + d2)/2.0 ) * xscaling;
-Y = ( v + (d1 - d2)/2.0 ) * yscaling;
+X = ( h + (d1 + d2)/2.0 ) * xScaling;
+Y = ( v + (d1 - d2)/2.0 ) * yScaling;
 
 gradient = sqrt(X.*X + Y.*Y); % Gradient amplitude.
 

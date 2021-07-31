@@ -2,7 +2,7 @@
 % to find the row, column and radius of the best fit circle.
 %
 % Usage:
-% [row, col, radius] = houghcircle(edgeim, rmin, rmax)
+% [row, col, radius] = houghcircle(edgeIm, rmin, rmax)
 %
 % Arguments:
 %	edgeIm      - the edge map image to be transformed
@@ -19,7 +19,7 @@
 % School of Computer Science & Software Engineering
 % The University of Western Australia
 % November 2003
-% Reworked and updated for optimisation
+% Reworked and updated for efficiency
 % Philip Bradish
 % Trinity College Dublin
 % July 2021
@@ -29,7 +29,6 @@ function [row, col, radius] = getHoughCircle(edgeIm, rMin, rMax)
 % to get all the centre points it intersects with
 % Performance critical code so it had been optimised for speed rather 
 % than readibility
-
 [rows, cols] = size(edgeIm);
 nradii = rMax-rMin+1;
 hSpace = nradii * rows * cols;
@@ -39,9 +38,9 @@ hSpace = nradii * rows * cols;
 radiuses = rMin:rMax;
 % Get max x value for each radius
 maxXValues = fix(radiuses/(sqrt(2)));
-maxMaxX = max(maxXValues);
+highestMaxX = max(maxXValues);
 % The x values used can never be higher than the highest max x value
-xRange = 0:maxMaxX;
+xRange = 0:highestMaxX;
 % Get grid of all the x values and the corresponding radiuses
 [rRanges, xRanges] = meshgrid(radiuses, xRange);
 % Remove all x values which are outside the range for that radius

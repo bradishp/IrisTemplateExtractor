@@ -1,7 +1,7 @@
 % linecoords - returns the x y coordinates of positions along a line
 %
 % Usage: 
-% [x,y] = linecoords(lines, imsize)
+% [x,y] = linecoords(lines, imSize)
 %
 % Arguments:
 %	lines       - an array containing parameters of the line in

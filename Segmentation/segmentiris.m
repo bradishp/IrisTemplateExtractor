@@ -26,7 +26,8 @@
 
 function [circleIris, circlePupil, imageWithNoise] = segmentiris(eyeImage)
 
-% define range of pupil & iris radii
+% Define range of pupil & iris radii
+% Should adjust these for the dataset
 
 %CASIA Interval
 lowerPupilRadius = 25;
@@ -48,14 +49,14 @@ upperIrisRadius = 120;
 
 
 % Define scaling factor, thresholds and weights.
-scaling = 0.4;
+scaling = 1;
 sigma = 2;
 highThresh = 0.2;   % Interval - 0.2, IITD - 0.2, Synthetic - 0.2
 lowThresh = 0.18;   % Interval - 0.18, IITD - 0.18, Synthetic - 0.19
 verticalWeight = 1;
 horizontalWeight = 0;
 
-% find the iris boundary
+% Find the iris boundary
 [irisRow, irisCol, irisRadius] = findcircle(eyeImage, lowerIrisRadius, upperIrisRadius, ...
     scaling, sigma, highThresh, lowThresh, verticalWeight, horizontalWeight);
 
@@ -65,20 +66,14 @@ irisRow = double(irisRow);
 irisCol = double(irisCol);
 irisRadius = double(irisRadius);
 
-irisRowLower = round(irisRow-irisRadius);
-irisRowUpper = round(irisRow+irisRadius);
-irisColumnLower = round(irisCol-irisRadius);
-irisColumnUpper = round(irisCol+irisRadius);
-
 imgSize = size(eyeImage);
 
-irisRowLower = max(1, irisRowLower);
-irisRowUpper = min(imgSize(1), irisRowUpper);
-irisColumnLower = max(1, irisColumnLower);
-irisColumnUpper = min(imgSize(2), irisColumnUpper);
+irisRowLower = max(1, round(irisRow-irisRadius));
+irisRowUpper = min(imgSize(1), round(irisRow+irisRadius));
+irisColumnLower = max(1, round(irisCol-irisRadius));
+irisColumnUpper = min(imgSize(2), round(irisCol+irisRadius));
 
-
-% to find the inner pupil, use just the region within the previously
+% To find the inner pupil, use just the region within the previously
 % detected iris boundary
 imagepupil = eyeImage(irisRowLower:irisRowUpper, irisColumnLower:irisColumnUpper);
 

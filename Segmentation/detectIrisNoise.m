@@ -6,7 +6,7 @@
 % Arguments:
 %           eyeImage        - image of the iris.
 %           circleIris      - Array containing x and y coordinates of the
-%                              iris' centre and its radius
+%                             iris' centre and its radius
 %           circlePupil     - Array containing x and y coordinates of the
 %                             pupil's centre and its radius
 % Output:
@@ -17,6 +17,7 @@
 
 function imageWithNoise = detectIrisNoise(eyeImage, circleIris, circlePupil)
 
+% Unpack the arrays for readability
 irisRow = double(circleIris(1));
 irisCol = double(circleIris(2));
 irisRadius = double(circleIris(3));
@@ -78,9 +79,12 @@ lowerThreshold = max(2 * stdeviation, 35);
 
 noiseFlags = ~logical(validIris);
 noiseFlags(pupilRegion) = false;
+% Mark anything outside thresholds as noise
 noiseFlags(validIris) = imageWithNoise(validIris) > avg + upperThreshold |...
     imageWithNoise(validIris) < avg - lowerThreshold;
-
+% Remove corrupt areas of the iris which are not connected to edges of the
+% the iris since all eyelashes and eyelids must begin outside the iris
+% region
 uncorruptRegions = imfill(~noiseFlags, 'holes');
 
 % Remove extreme outliers which are caused by reflections and
@@ -103,6 +107,7 @@ sampleY = [defualtBoundary, defualtBoundary, defualtBoundary];
 if eyelidMin < eyelidMax
     % Split iris in three and find eyelid for each of them
     irisThird = round((irisRadius * 2)/3);
+
     eyelidLeft = eyeImage(eyelidMin:eyelidMax, ...
         irisColumnLower:irisColumnLower+irisThird);
     linesLeft = findline(eyelidLeft);
