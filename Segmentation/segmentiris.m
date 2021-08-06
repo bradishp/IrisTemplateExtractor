@@ -49,7 +49,7 @@ upperIrisRadius = 120;
 
 
 % Define scaling factor, thresholds and weights.
-scaling = 1;
+scaling = 0.4;
 sigma = 2;
 highThresh = 0.2;   % Interval - 0.2, IITD - 0.2, Synthetic - 0.2
 lowThresh = 0.18;   % Interval - 0.18, IITD - 0.18, Synthetic - 0.19
