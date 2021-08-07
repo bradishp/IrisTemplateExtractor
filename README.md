@@ -9,7 +9,7 @@ The dataset must have a subfolder for each user. Each of these must have a subfo
 
 Code to compare the vector templates is provided seperately.
 
-There are a number of parameters throughout the code which may need to be adjusted for each dataset. These include the thresholds for detecting the iris boundaries and the maximum and minimum sizes of the pupil and iris radiuses.
+There are a number of parameters throughout the code which may need to be adjusted for each dataset. These include the thresholds for detecting the iris boundaries, the radial and angular resolutions and the minimum and maximum sizes of the pupil and iris radiuses.
 
 References:
 
